@@ -128,3 +128,133 @@ BFC的一个重要的效果是，让处于BFC内部的元素与外部的元素�
 - 内部的盒会在垂直方向一个接一个排列(可以看做BFC中有一个常规流)
 - 处于同一个BFC中的元素相互影响，可能发生margin collapse；
 - 每个元素的margin box的左边，与容器块border box的左边相接触(对于从左往右的格式化，否则相反)。即使存在浮动也是如此
+- BFC就是页面上的一个隔离的独立容器，容器里面的子元素不会影响到外面的元素，反之亦然；
+- 计算BFC的高度时，考虑BFC所包含的所有元素，连浮动元素也参与计算；
+- 浮动盒区域不叠加到BFC上；
+
+这么多性质有点难以理解，但可以作如下推理来帮助理解；html的根元素就是<html>，而根元素会创建一个BFC，创建一个新的BFC时就相当于在这个元素内部创建一个新<html>，子元素的定位就如同在一个新<html>页面中那样，而这个新旧html页面之间是不会相互影响的
+
+上述这个理解并不是最准确的理解，升值是将因果倒置了(因为html是根元素，因此才会有BFC的特性，而不是BFC有html的特性)，但这样的推理可以帮助理解BFC这个概念。
+
+## 五、从实际代码来分析BFC
+
+讲了这么多，还是比较难理解，所以下面通过一些例子来加深对BFC的认识。
+
+### 5.1 实例一
+
+```html
+<div class="box">
+    <div class="left"></div>
+    <div class="right"></div>
+</div>
+
+<style>
+    *{
+        margin:0;
+        padding:0;
+    }
+
+    .left{
+        background:#ff0;
+        opacity:0.5;
+        border:3px solid #f00;
+        width:200px;
+        height:200px;
+        float:left;
+    }
+
+    .right{
+        background:#00f;
+        opacity:0.5;
+        border:3px solid #000;
+        width:400px;
+        min-height:100px;
+    }
+
+    .box{
+        background:#888;
+        height:100%;
+        margin-left:50px;
+    }
+</style>
+```
+
+![BFC](img/bfc-2.webp "实例一")
+
+黄色框(#left)向左浮动，它创建了一个新的BFC，但暂时不讨论它所传就的BFC。由于黄色框浮动了，它脱离了原本normal flow的位置，因此，蓝色框(#right)就被定为到灰色父元素的左上角(特性3：元素左边与容器左边相接触)，与浮动黄色框发生了重叠。
+同时，由于灰色框(.box)并没有创建BFC，因此在计算高度的时候，并没有考虑黄色框的区域(特性6：浮动区域不叠加到BFC区域上)，发生了高度坍塌，(.box的高度为#right的高度并不是#left的高度)这也是常见问题之一。
+
+### 5.2 实例二
+
+现在通过设置overflow:hidden来创建BFC，在看看效果如何。
+
+```html
+.BFC{
+    overflow:hidden;
+}
+
+<div class="box BFC">
+    <div class="left"></div>
+    <div class="right"></div>
+</div>
+```
+
+![BFC](img/bfc-2.webp "实例二")
+
+灰色框创建了一个新的BFC后，高度发生了变化，计算高度时它将黄色框区域也考虑进去了(特性5：计算BFC的高度时，浮动元素也参与计算)
+
+而黄色框盒蓝色框的显示效果任然没有任何变化
+
+### 5.3 实例三
+
+现在，现将一些小块添加到蓝色框中，看看效果
+
+```html
+<style>
+    .little{
+        background:#fff;
+        width:50px;
+        height:50px;
+        margin:10px;
+        float:left;
+    }
+
+    <div class="box BFC">
+        <div class="left"></div>
+        <div class="right">
+            <div class="little"></div>
+            <div class="little"></div>
+            <div class="little"></div>
+        </div>
+    </div>
+</style>
+```
+
+![BFC](img/bfc-4.webp "实例三")
+
+由于蓝色框没有创建新的BFC，因此蓝色框中白色块收到黄色框的影响，被挤到了右边去了。现不要管这个，看看白色块的margin
+
+### 5.4 实例四
+
+利用同实例二中一样的方法，为蓝色框创建BFC；
+
+```html
+<style>
+    <div class="box BFC">
+        <div class="left"></div>
+        <div class="right BFC">
+            <div class="little"></div>
+            <div class="little"></div>
+            <div class="little"></div>
+        </div>
+    </div>
+</style>
+```
+
+![BFC](img/bfc-5.webp "实例五")
+
+一旦蓝色框创建了新的BFC以后，蓝色框就不与黄色浮动框发生重叠了，同时内部的白块处于隔离空间(特性4：BFC就是页面上的一个隔离的独立容器)，白色块也不会受到黄色浮动框的挤压。
+
+## 六、总结
+
+以上就是BFC的分析，BFC的概念比较抽象，但通过实例分析应该能够更好的理解BFC。在实际中，利用BFC可以闭合浮动（实例二），繁殖与浮动元素重叠（实例四）。同时，由于BFC的隔离作用，可以利用BFC包含一个元素，防止这个元素与BFC外的元素发生margin collapse

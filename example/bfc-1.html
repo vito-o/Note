@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+        *{
+            margin:0;
+            padding:0;
+        }
+    
+        .left{
+            background:#ff0;
+            opacity:0.5;
+            border:3px solid #f00;
+            width:200px;
+            height:200px;
+            float:left;
+        }
+    
+        .right{
+            background:#00f;
+            opacity:0.5;
+            border:3px solid #000;
+            width:400px;
+            min-height:100px;
+        }
+    
+        .box{
+            background:#888;
+            height:100%;
+            margin-left:50px;
+        }
+
+        .BFC{
+            overflow: hidden;
+        }
+
+        .little{
+            background:#fff;
+            width:50px;
+            height:50px;
+            margin:10px;
+            float:left;
+        }
+    </style>
+</head>
+<body>
+    <div class="box BFC">
+        <div class="left"></div>
+        <div class="right ">
+            <div class="little"></div>
+            <div class="little"></div>
+            <div class="little"></div>
+        </div>
+    </div>
+</body>
+</html>
